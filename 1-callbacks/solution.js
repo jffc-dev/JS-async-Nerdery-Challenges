@@ -32,7 +32,7 @@ node solution.js name1 name2 name3
 ** give a look to node.js util.promisify, avoid to alter the validate-user.file **
 */
 
-const validateUser = require("./validate-user")
+const validateUser = require("./validate-user");
 
 let allowedUsers = []
 let deniedUsersErrors = []
