@@ -24,16 +24,38 @@ const id = yourRandomMethod() //third run
 7. log the resultant fullname, or the error, at the end
 */
 
+const lastNamesFetcher = require("./lastnames");
+const firstNameFetcher = require('./firstnames');
+
 function solution() {
-    // YOUR SOLUTION GOES HERE
+    const randomValue = randomizer();
 
-    // You generate your id value here
+    console.log(`The random value generatore: ${randomValue}`);
+    
+    lastNamesFetcher(randomValue)
+        .then(lastName => {
+            console.log(`Fetchet lastName: ${lastName}`);
 
-    // You call the lastnames method with your id
-
-    // You call the firstname method
-
-    // You log the fullname, or error, here
+            return firstNameFetcher(lastName);
+        })
+        .then(firstName => {
+            console.log(`Finished fetching name: ${firstName}`)
+        })
+        .catch(error => {
+            console.log(`Got error: ${error}`)
+        });
 }
 
-solution()
+function randomizer() {
+    const randomNumber = Math.round(Math.random() * (100 - 1) + 1);
+    const shouldNegate = Math.random() >= 0.5;
+    const shouldReturnNaN = Math.random() >= 0.5;
+
+    if (shouldNegate) {
+        return shouldReturnNaN ? NaN : (-1 * randomNumber);
+    } else {
+        return randomNumber;
+    }
+}
+
+solution();
