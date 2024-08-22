@@ -31,7 +31,7 @@ function solution() {
     const randomValue = randomizer();
 
     console.log(`The random value generatore: ${randomValue}`);
-    
+
     lastNamesFetcher(randomValue)
         .then(lastName => {
             console.log(`Fetchet lastName: ${lastName}`);
