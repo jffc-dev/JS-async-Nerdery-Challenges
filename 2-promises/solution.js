@@ -32,17 +32,40 @@ function solution() {
 
     console.log(`The random value generatore: ${randomValue}`);
 
+    let foundLastName = '';
+    let foundFirstName = '';
+
     lastNamesFetcher(randomValue)
         .then(lastName => {
             console.log(`Fetchet lastName: ${lastName}`);
+
+            foundLastName = lastName
 
             return firstNameFetcher(lastName);
         })
         .then(firstName => {
             console.log(`Finished fetching name: ${firstName}`)
+
+            foundFirstName = firstName
         })
         .catch(error => {
             console.log(`Got error: ${error}`)
+        })
+        .finally(() => {
+            let nameFound = '';
+
+            if(foundFirstName !== '') {
+                nameFound = nameFound.concat(foundFirstName);
+            }
+            if(foundLastName !== '') {
+                if (nameFound === '') {
+                    nameFound = nameFound.concat(foundLastName);
+                } else {
+                    nameFound = nameFound.concat(' ', foundLastName);
+                }
+            }
+
+            console.log(`Name(s) found: ${nameFound}`)
         });
 }
 

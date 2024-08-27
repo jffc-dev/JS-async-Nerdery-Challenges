@@ -73,11 +73,9 @@ const util = require('util');
 
 const nameValidatorPromise = util.promisify(nameValidator);
 
-function promisedSolution() {
+function promisedSolution(users) {
     let allowedUsers = [];
     let deniedUsers = [];
-
-    const users = ["Michael", "Mary", "Richard", "Sadie", "Benjamin"];
 
     const promises = users.map(user => 
         nameValidatorPromise(user)
@@ -88,13 +86,28 @@ function promisedSolution() {
     Promise.allSettled(promises)
         .then(results => {
             // log the final result
-            console.log('---------- Promise Solution ----------')
-            console.log('Allowed users:')
-            console.log(allowedUsers)
+            console.log('---------- Promise Solution ----------');
+            console.log('Allowed users:');
+            console.log(allowedUsers);
 
-            console.log('Denied users:')
-            console.log(deniedUsers)
+            console.log('Denied users:');
+            console.log(deniedUsers);
         });
 }
 
-promisedSolution();
+promisedSolution(["Michael", "Mary", "Richard", "Sadie", "Benjamin"]);
+
+async function readliner() {
+    const readline = require('readline/promises');
+    const { stdin: input, stdout: output } = require('process');
+
+    const consoleReader = readline.createInterface({ input, output });
+
+    const answer = await consoleReader.question('Provide a list of Names, separated by spaces or commas: ');
+
+    const names = answer.split(/[\s,]+/);
+
+    promisedSolution(names);
+}
+
+readliner();

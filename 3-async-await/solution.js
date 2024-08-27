@@ -28,10 +28,8 @@ async function solution() {
     const id = Date.now().toString().slice(-2);
 
     // You use Promise.all() here
-    const requests = Promise.all([fetchProducts(id), fetchPrices(id)]);
-
     try {
-        const [product, price] = await requests;
+        const [product, price] = await Promise.all([fetchProducts(id), fetchPrices(id)]);;
 
         const object = {
             id: id,
@@ -46,17 +44,13 @@ async function solution() {
     }
 
     // You use Promise.allSettled() here
-    const requestsSettled = Promise.allSettled([fetchPrices(id), fetchProducts(id)]);
+    const results = await Promise.allSettled([fetchPrices(id), fetchProducts(id)]);
 
-    // Log the results, or errors, here
-    const results = await requestsSettled;
-
-    const settledObject = new Object();
-    settledObject.id = id;
+    let settledObject = { id };
     
     results.forEach((result, index) => {
         if (result.status === 'fulfilled') {
-            settledObject[keyName(index)] = result.value;
+            settledObject = { ...settledObject, [keyName(index)]: result.value };
         } else if (result.status === 'rejected') {
             console.log(`Ecountered allSettled error: ${result.reason}`);
         }
@@ -64,6 +58,28 @@ async function solution() {
 
     console.log('Promise.allSettled() fetched:');
     console.log(settledObject);
+
+    // Promise Race
+    Promise.race([fetchPrices(id), fetchProducts(id)])
+        .then((result) => {
+            console.log('Promise.Race() result:');
+            console.log(`The first promise to finish was: ${result}`);
+        })
+        .catch((error) => {
+            console.log('Promise.Race() result:');
+            console.log(`The first promise to error was: ${error}`);
+        });
+
+    // Promise Any
+    Promise.any([fetchPrices(id), fetchProducts(id)])
+        .then((result) => {
+            console.log('Promise.Any() result:');
+            console.log(`The first promise to succesfully complete was: ${result}`);
+        })
+        .catch((error) => {
+            console.log('Promise.Any() result:');
+            console.log(`All promises rejected: ${error}`);
+        })
 }
 
 function keyName(index) {
