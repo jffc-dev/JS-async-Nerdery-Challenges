@@ -1,5 +1,8 @@
 const validate = require('./validate-user.js')
 const { argv } = require('node:process')
+const util = require('util')
+
+const promisiedValidate = util.promisify(validate)
 
 /*
 INSTRUCTIONS
@@ -62,21 +65,17 @@ function solution() {
         })
         console.groupEnd()
     }
-    
-    const callback = (error, data) => {
-        if(error){
-            errorUsers.push(error.message)
-        }else{
-            succesUsers.push(data)
-        }
-
-        if(succesUsers.length + errorUsers.length === testUsers.length){
-            printResults()
-        }
-    }
 
     for (const user of testUsers) {
-        validate(user, callback)
+        const a = promisiedValidate(user).then((data)=>{
+            succesUsers.push(data)
+        }).catch((error)=>{
+            errorUsers.push(error.message)
+        }).finally(()=>{
+            if(succesUsers.length + errorUsers.length === testUsers.length){
+                printResults()
+            }
+        })
     }
 }
 
