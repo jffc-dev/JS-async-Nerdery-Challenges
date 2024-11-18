@@ -1,4 +1,5 @@
 const validate = require('./validate-user.js')
+const { argv } = require('node:process')
 
 /*
 INSTRUCTIONS
@@ -35,10 +36,16 @@ node solution.js name1 name2 name3
 */
 
 function solution() {
-
-    const testUsers = ["John", "Mary", "Richard", "Javier", "Fernando"]
+    const inputUsers = argv.slice(2)
+    let testUsers = ["John", "Mary", "Richard", "Javier", "Fernando"]
     const succesUsers = []
     const errorUsers = []
+
+    if(inputUsers.length === 1 && inputUsers[0].includes(',')){
+        testUsers = inputUsers[0].split(',')
+    }else if(inputUsers.length > 1){
+        testUsers = inputUsers
+    }
 
     const printResults = () => {
         console.log('\nSuccess')
