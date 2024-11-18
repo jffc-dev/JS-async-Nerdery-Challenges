@@ -1,3 +1,5 @@
+const validate = require('./validate-user.js')
+
 /*
 INSTRUCTIONS
 
@@ -33,13 +35,42 @@ node solution.js name1 name2 name3
 */
 
 function solution() {
-    // YOUR SOLUTION GOES HERE
 
-    // you get your 5 names here
+    const testUsers = ["John", "Mary", "Richard", "Javier", "Fernando"]
+    const succesUsers = []
+    const errorUsers = []
 
-    // iterate the names array and validate them with the method
+    const printResults = () => {
+        console.log('\nSuccess')
+        console.group()
+        succesUsers.forEach(user => {
+            console.log(`\nid: ${user.id}\nname: ${user.name}`)
+        })
+        console.groupEnd()
 
-    // log the final result
+        console.log('\nFailure')
+        console.group()
+        errorUsers.forEach(error => {
+            console.log(error)
+        })
+        console.groupEnd()
+    }
+    
+    const callback = (error, data) => {
+        if(error){
+            errorUsers.push(error.message)
+        }else{
+            succesUsers.push(data)
+        }
+
+        if(succesUsers.length + errorUsers.length === testUsers.length){
+            printResults()
+        }
+    }
+
+    for (const user of testUsers) {
+        validate(user, callback)
+    }
 }
 
 solution()
