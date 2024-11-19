@@ -27,44 +27,47 @@ const id = yourRandomMethod() //third run
 7. log the resultant fullname, or the error, at the end
 */
 
-function solution() {
-
-    const generateRandomId = () => {
-        const array = [null, false, undefined, '', ...Array(100).keys()]
-        const resultId = array[Math.floor(Math.random() * array.length)]
-        return resultId
-    }
-
-    const generatedId = generateRandomId()
-
-    lastnameMethod(generatedId)
-        .then((resultLastname)=>{
-            return resultLastname
-        })
-        .then((lastname)=>{
-            firstnameMethod(lastname)
-                .then((resultFirstname)=>{
-                    console.log(`${resultFirstname} ${lastname}`)
-                })
-                .catch((error)=>{
-                    console.log('Lastname Error:',error.message)
-                })
-        })
-        .catch((error)=>{
-            console.log('Firstname Error:',error.message)
-        })
-        .finally(()=>{
-            console.log(`Generated Id: ${generatedId}`)
-        })
-    // YOUR SOLUTION GOES HERE
-
-    // You generate your id value here
-
-    // You call the lastnames method with your id
-
-    // You call the firstname method
-
-    // You log the fullname, or error, here
+const generateRandomId = () => {
+    const array = [null, false, undefined, '', ...Array(100).keys()]
+    const resultId = array[Math.floor(Math.random() * array.length)]
+    return resultId
 }
 
-solution()
+const handleError = (type, message, id) =>{
+    return {
+        error: {
+            type,
+            message
+        },
+        id,
+        fullname: null
+    }
+}
+
+const generatedId = generateRandomId()
+
+function solution(id) {
+
+    console.log(`Procccess started`)
+    return lastnameMethod(id)
+        .then((lastname)=>{
+            return firstnameMethod(lastname)
+                .then((resultFirstname)=>{
+                    const fullname = `${resultFirstname} ${lastname}`
+                    return {
+                        error: null,
+                        id,
+                        fullname
+                    }
+                })
+                .catch((error)=>handleError('Lastname', error.message, id))
+        })
+        .catch((error)=>handleError('Firstname', error.message, id))
+        .finally(()=>{
+            console.log(`Procccess completed`)
+        })
+}
+
+solution(generatedId).then((data)=>{
+    console.log(data)
+})
