@@ -1,5 +1,6 @@
 const pricesFunction = require('./prices')
 const productsFunction = require('./products')
+const {setTimeout} = require('timers/promises')
 /*
 INSTRUCTIONS
 
@@ -29,75 +30,133 @@ class Product {
         this.price = price
     }
     print(){
+        console.log(`${'*'.repeat(30)}`)
         console.log(`ID: ${this.id} | product: ${this.name} | price: ${this.price.toFixed(2)} $`)
+        console.log(`${'*'.repeat(30)}`)
     }
 }
 
 class CustomError extends Error{
-    constructor(message, origin){
+    constructor(message, origin, id){
         super(message)
         this.origin = origin
+        this.id = id
+    }
+    print(){
+        console.error(`${'='.repeat(30)}`)
+        console.error(`**ERROR OCCURRED`)
+        console.error(`- ID: ${this.id}`)
+        console.error(`- Origin: ${this.origin || 'unknown'}`)
+        console.error(`- Error Message: ${this.message}`)
+        console.error(`${'='.repeat(30)}`)
     }
 }
 
-const printError = (id, error) => {
-    console.error(`
-        === ERROR OCCURRED ===
-        - ID: ${id}
-        - Origin: ${error.origin || 'unknown'}
-        - Error Message: ${error.message}
-        =======================
-    `);
+class Result {
+    constructor(product, error, timelapse){
+        this.product = product
+        this.error = error
+        this.timelapse = timelapse
+    }
+    setProduct(product){
+        this.product = product
+    }
+    setError(error){
+        this.error = error
+    }
+    setTimelapse(timelapse){
+        this.timelapse = timelapse
+    }
+
+    print(){
+        console.log(`\nResult in: ${this.timelapse} miliseconds`)
+        if(this.error){
+            this.error.print()
+        }else{
+            this.product.print()
+        }
+    }
 }
 
 const generateId = async(delay) => {
     if(delay){
-        await new Promise(resolve => setTimeout(resolve, delay))
+        await setTimeout(100)
     }
     const currentTime = Date.now()
     return currentTime % 100
 }
 
-async function solution(allId, allSettledId) {
-    
-    console.log('Starting Promise.all proccess')
+async function solutionAll(id){
     try {
         const [name, price] = await Promise.all([
-            productsFunction(allId),
-            pricesFunction(allId)
+            productsFunction(id),
+            pricesFunction(id)
         ])
-        const product = new Product(allId, name, price)
-        product.print()
+        const product = new Product(id, name, price)
+        return product
 
     } catch (error) {
-        printError(allId, error)
+        throw new CustomError(error.message, 'price', id)
+    } finally {
     }
-    console.log('Ending Promise.all proccess\n')
+}
 
-    console.log('Starting Promise.allSettled proccess')
-
+async function solutionAllSettled(id){
     try {
         const [nameResponse, priceResponse] = await Promise.allSettled([
-            productsFunction(allSettledId),
-            pricesFunction(allSettledId)
+            productsFunction(id),
+            pricesFunction(id)
         ])
 
         if(nameResponse.status === 'rejected'){
-            throw new CustomError(nameResponse.reason.message, 'product')
+            throw new CustomError(nameResponse.reason.message, 'product', id)
         }
         if(priceResponse.status === 'rejected'){
-            throw new CustomError(priceResponse.reason.message, 'price')
+            throw new CustomError(priceResponse.reason.message, 'price', id)
         }
 
         const {value:name} = nameResponse
         const {value:price} = priceResponse
 
-        const product = new Product(allSettledId, name, price)
-        product.print()
+        const product = new Product(id, name, price)
+        return product
     } catch (error) {
-        printError(allSettledId, error)
+        throw error
     }
-    console.log('Ending Promise.allSettled proccess')
+}
+
+async function solution(allId, allSettledId) {
+    const promiseAll = solutionAll(allId)
+    const promiseAllSettle = solutionAllSettled(allSettledId)
+    const raceResult = new Result()
+    const anyResult = new Result()
+    const results = {raceResult, anyResult}
+
+    let startTimer = Date.now()
+    try {
+        const raceResponse = await Promise.race([
+            promiseAll, promiseAllSettle
+        ])
+        raceResult.setProduct(raceResponse)
+    } catch (error) {
+        raceResult.setError(error)
+    } finally {
+        raceResult.setTimelapse(Date.now()-startTimer)
+    }
+
+    startTimer = Date.now()
+    try {
+        const anyResponse = await Promise.any([
+            promiseAll, promiseAllSettle
+        ])
+        anyResult.setProduct(anyResponse)
+    } catch (error) {
+        anyResult.setError(error)
+    } finally {
+        anyResult.setTimelapse(Date.now()-startTimer)
+    }
+
+    return results
 } 
 
 
@@ -105,7 +164,10 @@ async function solution(allId, allSettledId) {
     async function(){
         const generatedAllId = await generateId()
         const generatedAllSettledId = await generateId(100)
-        solution(generatedAllId, generatedAllSettledId)
+        const {raceResult, anyResult} = await solution(generatedAllId, generatedAllSettledId)
+
+        raceResult.print()
+        anyResult.print()
     }
 )()
 
