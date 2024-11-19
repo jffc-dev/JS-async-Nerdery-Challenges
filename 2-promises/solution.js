@@ -1,3 +1,6 @@
+const firstnameMethod = require('./firstnames')
+const lastnameMethod = require('./lastnames')
+
 /*
 INSTRUCTIONS
 
@@ -25,6 +28,34 @@ const id = yourRandomMethod() //third run
 */
 
 function solution() {
+
+    const generateRandomId = () => {
+        const array = [null, false, undefined, '', ...Array(100).keys()]
+        const resultId = array[Math.floor(Math.random() * array.length)]
+        return resultId
+    }
+
+    const generatedId = generateRandomId()
+
+    lastnameMethod(generatedId)
+        .then((resultLastname)=>{
+            return resultLastname
+        })
+        .then((lastname)=>{
+            firstnameMethod(lastname)
+                .then((resultFirstname)=>{
+                    console.log(`${resultFirstname} ${lastname}`)
+                })
+                .catch((error)=>{
+                    console.log('Lastname Error:',error.message)
+                })
+        })
+        .catch((error)=>{
+            console.log('Firstname Error:',error.message)
+        })
+        .finally(()=>{
+            console.log(`Generated Id: ${generatedId}`)
+        })
     // YOUR SOLUTION GOES HERE
 
     // You generate your id value here
