@@ -80,7 +80,7 @@ class Result {
 
 const generateId = async(delay) => {
     if(delay){
-        await setTimeout(100)
+        await setTimeout(delay)
     }
     const currentTime = Date.now()
     return currentTime % 100
@@ -96,8 +96,7 @@ async function solutionAll(id){
         return product
 
     } catch (error) {
-        throw new CustomError(error.message, 'price', id)
-    } finally {
+        throw new CustomError(error.message, null, id)
     }
 }
 
@@ -118,8 +117,7 @@ async function solutionAllSettled(id){
         const {value:name} = nameResponse
         const {value:price} = priceResponse
 
-        const product = new Product(id, name, price)
-        return product
+        return product = new Product(id, name, price)
     } catch (error) {
         throw error
     }
